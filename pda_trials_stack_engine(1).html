@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDA Trials | The Stack Engine</title>
+<style>
+:root{--bg:#08111f;--panel:#101d30;--panel2:#15243a;--ink:#edf5ff;--muted:#9db0c9;--blue:#69a8ff;--orange:#ffad70;--green:#66e2ad;--red:#ff7e8b;--line:#2a3d57}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#172d4d 0,transparent 36%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55}
+.wrap{max-width:1160px;margin:auto;padding:22px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 28px}.brand{font-weight:900;letter-spacing:.12em;font-size:.85rem}.brand span{color:var(--blue)}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 11px;color:var(--muted);font-size:.78rem}
+.hero{padding:34px 0 36px;display:grid;grid-template-columns:1.3fr .7fr;gap:24px;align-items:center}.eyebrow{color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.16em;font-size:.75rem}.hero h1{font-size:clamp(2.6rem,7vw,5.5rem);line-height:.98;letter-spacing:-.055em;margin:14px 0 18px}.hero h1 span{color:var(--blue)}.hero p{max-width:650px;color:var(--muted);font-size:1.08rem}.hero-art{background:linear-gradient(145deg,#132744,#0d1727);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 20px 70px #0004}.flow{display:grid;gap:10px}.flowbox{padding:12px;border:1px solid var(--line);border-radius:12px;text-align:center;font-weight:800;background:#0a1423}.flowbox:nth-child(1){color:var(--blue)}.flowbox:nth-child(3){color:var(--orange)}.flowbox:nth-child(5){color:var(--green)}.down{text-align:center;color:var(--muted);line-height:1}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:24px 0 14px}.section-head h2{margin:0;font-size:1.65rem;letter-spacing:-.03em}.section-head p{margin:0;color:var(--muted);font-size:.9rem}
+.missions{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,#122139,#0d192a);border:1px solid var(--line);border-radius:20px;padding:22px;min-width:0}.tag{display:inline-flex;border-radius:7px;padding:4px 8px;font-size:.72rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.blue{background:#183861;color:#9fc8ff}.orange{background:#492b1b;color:#ffc096}.green{background:#123b30;color:#94f2c9}.card h3{font-size:1.35rem;margin:12px 0 5px}.muted{color:var(--muted)}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#081321;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto}
+label{display:block;font-size:.85rem;font-weight:750;margin:12px 0 6px}input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#081321;color:var(--ink);font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 15px;font-weight:850;font:inherit;transition:transform .15s,filter .15s}button:hover{filter:brightness(1.12);transform:translateY(-1px)}.btn-blue{background:var(--blue);color:#07111f}.btn-orange{background:var(--orange);color:#201207}.btn-ghost{background:#1a2a40;color:var(--ink);border:1px solid var(--line)}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.result{margin-top:13px;padding:12px;border-radius:10px;background:#081321;border:1px solid var(--line);font-size:.92rem}.result.good{border-color:#286d56;color:var(--green)}.result.bad{border-color:#7b3440;color:var(--red)}
+.stack-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;min-height:48px;margin:10px 0}.stack-cell{display:inline-flex;min-width:38px;height:38px;align-items:center;justify-content:center;border:1px solid #4775a9;background:#152d4b;border-radius:8px;color:#b8d8ff;font-family:ui-monospace,monospace;font-weight:900}.stack-cell.bottom{border-color:#5a947f;background:#12352e;color:#9cf2cc}.step-info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.metric{background:#0a1423;border:1px solid var(--line);border-radius:10px;padding:10px}.metric small{display:block;color:var(--muted);font-size:.72rem}.metric strong{display:block;overflow-wrap:anywhere}
+.trace{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:12px}.trace th,.trace td{text-align:left;border-bottom:1px solid var(--line);padding:9px 7px;vertical-align:top}.trace th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}.trace-wrap{overflow-x:auto}
+.rule-list{display:grid;gap:8px;margin-top:12px}.rule{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#0a1423;font-family:ui-monospace,monospace;font-size:.86rem;overflow-wrap:anywhere}
+.challenge{display:grid;grid-template-columns:1fr 1fr;gap:16px}.challenge .card{display:flex;flex-direction:column}.challenge button{margin-top:auto;align-self:flex-start}
+footer{margin:30px 0 8px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media(max-width:780px){.hero{grid-template-columns:1fr}.missions,.challenge{grid-template-columns:1fr}.hero-art{max-width:480px}.section-head{align-items:start;flex-direction:column}.wrap{padding:16px}.card{padding:17px}}
+@media print{body{background:white;color:#111}.hero-art,.card{box-shadow:none;background:white;color:#111}.muted,.hero p,footer{color:#444}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="topbar"><div class="brand">◈ <span>PDA</span> TRIALS</div><div class="pill">AUTOMATA LAB / 01</div></nav>
+  <header class="hero">
+    <div><div class="eyebrow">Two missions · One memory mechanism</div><h1>THE STACK<br><span>ENGINE.</span></h1><p>A pushdown automaton does more than read. It remembers symbols using a stack, then uses that memory to recognize patterns. Run the missions below.</p></div>
+    <div class="hero-art"><div class="flow"><div class="flowbox">01 &nbsp; INPUT STREAM</div><div class="down">↓</div><div class="flowbox">02 &nbsp; PDA PROCESSOR</div><div class="down">↓</div><div class="flowbox">03 &nbsp; STACK MEMORY</div><div class="down">↓</div><div class="flowbox">04 &nbsp; ACCEPT / REJECT</div></div></div>
+  </header>
+
+  <div class="section-head"><h2>Choose your mission</h2><p>Interactive demonstrations · No sign-in required</p></div>
+  <main class="missions">
+    <section class="card">
+      <span class="tag blue">Mission 01 / Mirror code</span>
+      <h3>Match across the divider</h3>
+      <p class="muted">Language: <span class="formula">L = { wcwᴿ | w ∈ {0,1}* }</span></p>
+      <p>Before <b>c</b>, push each 0 or 1 onto the stack. After <b>c</b>, the symbols must match in reverse order.</p>
+      <label for="mirrorInput">Enter a string</label><input id="mirrorInput" value="01c10" maxlength="40" spellcheck="false" aria-label="Mirror code input">
+      <div class="controls"><button class="btn-blue" onclick="runMirror()">Run mirror test</button><button class="btn-ghost" onclick="setMirror('10c01')">Try valid</button><button class="btn-ghost" onclick="setMirror('01c11')">Try invalid</button></div>
+      <div id="mirrorResult" class="result" aria-live="polite">Ready. Run a string to inspect its stack trace.</div>
+      <div class="step-info"><div class="metric"><small>INPUT</small><strong id="mInput">01c10</strong></div><div class="metric"><small>STACK TOP →</small><strong id="mStack">Z₀</strong></div><div class="metric"><small>DECISION</small><strong id="mDecision">READY</strong></div></div>
+      <div class="trace-wrap"><table class="trace"><thead><tr><th>Step</th><th>Remaining</th><th>Stack (top first)</th><th>Action</th></tr></thead><tbody id="mirrorTrace"><tr><td colspan="4" class="muted">Trace appears here.</td></tr></tbody></table></div>
+      <div class="rule-list">
+        <div class="rule">q₀, 0, X → q₀, 0X (push 0)</div>
+        <div class="rule">q₀, 1, X → q₀, 1X (push 1)</div>
+        <div class="rule">q₀, c, X → q₁, X (switch phase)</div>
+        <div class="rule">q₁, 0, 0 → q₁, ε · q₁, 1, 1 → q₁, ε</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <span class="tag orange">Mission 02 / Grammar code</span>
+      <h3>Build a balanced string</h3>
+      <p class="muted">CFG: <span class="formula">S → aSb | ε</span></p>
+      <p>Each production adds one <b>a</b> to the front and one <b>b</b> to the end. The ε production stops the recursion.</p>
+      <label for="grammarInput">Choose a target string</label><input id="grammarInput" value="aaabbb" maxlength="40" spellcheck="false" aria-label="Grammar input">
+      <div class="controls"><button class="btn-orange" onclick="runGrammar()">Run grammar trace</button><button class="btn-ghost" onclick="setGrammar('aabb')">Try aabb</button><button class="btn-ghost" onclick="setGrammar('aabbb')">Try invalid</button></div>
+      <div id="grammarResult" class="result" aria-live="polite">Ready. Run a string to see the grammar simulation.</div>
+      <div class="step-info"><div class="metric"><small>INPUT</small><strong id="gInput">aaabbb</strong></div><div class="metric"><small>STACK TOP →</small><strong id="gStack">S Z₀</strong></div><div class="metric"><small>DECISION</small><strong id="gDecision">READY</strong></div></div>
+      <div class="trace-wrap"><table class="trace"><thead><tr><th>Step</th><th>Remaining</th><th>Stack (top first)</th><th>Action</th></tr></thead><tbody id="grammarTrace"><tr><td colspan="4" class="muted">Trace appears here.</td></tr></tbody></table></div>
+      <div class="rule-list">
+        <div class="rule">ε, S → aSb (apply production S → aSb)</div>
+        <div class="rule">ε, S → ε (apply production S → ε)</div>
+        <div class="rule">a, a → ε (match terminal a)</div>
+        <div class="rule">b, b → ε (match terminal b)</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="section-head"><h2>Audience challenge</h2><p>Predict the machine's decision</p></div>
+  <section class="challenge">
+    <div class="card"><span class="tag blue">Quick test A</span><h3>Mirror or mismatch?</h3><p>Will <span class="formula">10c01</span> be accepted by Mission 01?</p><button class="btn-ghost" onclick="reveal('quizA','Yes. The reverse of 10 is 01, so the stack matches.','good')">Reveal answer</button><div id="quizA" class="result">Make your prediction before revealing.</div></div>
+    <div class="card"><span class="tag orange">Quick test B</span><h3>Balanced or broken?</h3><p>Will <span class="formula">aabbb</span> be generated by Mission 02?</p><button class="btn-ghost" onclick="reveal('quizB','No. It has two a symbols but three b symbols.','bad')">Reveal answer</button><div id="quizB" class="result">Make your prediction before revealing.</div></div>
+  </section>
+  <footer><span>PDA TRIALS · Formal Languages & Automata Theory</span><span>Remember the rule: push → compare → decide.</span></footer>
+</div>
+<script>
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setMirror(s){document.getElementById('mirrorInput').value=s;runMirror()}
+function setGrammar(s){document.getElementById('grammarInput').value=s;runGrammar()}
+function resultBox(id,ok,msg){const e=document.getElementById(id);e.className='result '+(ok?'good':'bad');e.textContent=msg}
+function renderRows(id,rows){document.getElementById(id).innerHTML=rows.map(r=>'<tr>'+r.map(x=>'<td>'+esc(x)+'</td>').join('')+'</tr>').join('')}
+function runMirror(){
+ const s=document.getElementById('mirrorInput').value.trim();let rows=[],stack=[],phase=0,ok=true,why='';let rem=s;
+ const add=(step,remaining,st,action)=>rows.push([step,remaining||'ε',st.join(' ')||'∅',action]);
+ add(0,rem,['Z₀'],'Start');
+ if((s.match(/c/g)||[]).length!==1){ok=false;why='The string must contain exactly one divider c.'}
+ else{
+  const ix=s.indexOf('c'),left=s.slice(0,ix),right=s.slice(ix+1);
+  if(!/^[01]*$/.test(left)||!/^[01]*$/.test(right)){ok=false;why='Only 0 and 1 are allowed around the divider c.'}
+  else{
+   let step=0;
+   for(const ch of left){stack.unshift(ch);rem=rem.slice(1);add(++step,rem,[...stack,'Z₀'],'Read '+ch+'; push '+ch)}
+   rem=rem.slice(1);phase=1;add(++step,rem,[...stack,'Z₀'],'Read c; switch to matching phase');
+   for(const ch of right){
+    if(stack[0]!==ch){ok=false;why='Mismatch: expected '+(stack[0]||'no symbol')+' at the stack top, but read '+ch+'.';break}
+    stack.shift();rem=rem.slice(1);add(++step,rem,[...stack,'Z₀'],'Read '+ch+'; pop '+ch)
+   }
+   if(ok&&stack.length){ok=false;why='Input ended, but unmatched symbols remain on the stack.'}
+   if(ok){add(++step,'',['Z₀'],'Input consumed; accept')}
+  }
+ }
+ if(!ok)rows.push(['—',rem||'ε',[...stack,'Z₀'].join(' '),why]);
+ renderRows('mirrorTrace',rows);
+ document.getElementById('mInput').textContent=s||'(empty)';
+ document.getElementById('mStack').textContent=(stack.join(' ')||'∅')+(stack.length?' Z₀':'Z₀');
+ document.getElementById('mDecision').textContent=ok?'ACCEPT':'REJECT';
+ resultBox('mirrorResult',ok,ok?'✓ ACCEPTED — every symbol after c matches the reverse of the first half.':'✕ REJECTED — '+why);
+}
+function runGrammar(){
+ const s=document.getElementById('grammarInput').value.trim();let rows=[],stack=['S','Z₀'],rem=s,step=0,ok=true,why='';
+ const add=(remaining,action)=>rows.push([step++,remaining||'ε',stack.join(' '),action]);
+ add(rem,'Start with S');
+ if(!/^(?:a*b*)$/.test(s)){ok=false;why='Use only a symbols followed by b symbols; no a may appear after a b.'}
+ else{
+  const n=(s.match(/a/g)||[]).length,m=(s.match(/b/g)||[]).length;
+  if(n!==m){ok=false;why='The grammar requires equal numbers of a and b.'}
+  else{
+   for(let i=0;i<n;i++){
+    stack.shift();stack.unshift('b');stack.unshift('S');stack.unshift('a');add(rem,'Apply S → aSb');
+    if(rem[0]!=='a'){ok=false;why='Expected a while matching the generated prefix.';break}
+    rem=rem.slice(1);stack.shift();add(rem,'Read a; pop a');
+   }
+   if(ok){stack.shift();add(rem,'Apply S → ε')}
+   for(let i=0;ok&&i<n;i++){
+    if(rem[0]!=='b'||stack[0]!=='b'){ok=false;why='Terminal b did not match the stack.';break}
+    rem=rem.slice(1);stack.shift();add(rem,'Read b; pop b');
+   }
+   if(ok&&rem.length===0&&stack.length===1&&stack[0]==='Z₀')add('', 'Input consumed; accept');
+   else if(ok){ok=false;why='The input or stack was not fully consumed.'}
+  }
+ }
+ if(!ok)rows.push(['—',rem||'ε',stack.join(' '),why]);
+ renderRows('grammarTrace',rows);
+ document.getElementById('gInput').textContent=s||'(empty)';
+ document.getElementById('gStack').textContent=stack.join(' ');
+ document.getElementById('gDecision').textContent=ok?'ACCEPT':'REJECT';
+ resultBox('grammarResult',ok,ok?'✓ ACCEPTED — the grammar can generate this string.':'✕ REJECTED — '+why);
+}
+function reveal(id,msg,type){const e=document.getElementById(id);e.className='result '+type;e.textContent=msg}
+runMirror();runGrammar();
+</script>
+</body>
+</html>
