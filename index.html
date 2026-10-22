@@ -141,5 +141,82 @@ function runGrammar(){
 function reveal(id,msg,type){const e=document.getElementById(id);e.className='result '+type;e.textContent=msg}
 runMirror();runGrammar();
 </script>
+
+  <!-- PDA Trials: editable Language + CFG formulas.
+     Paste this entire block immediately BEFORE </body> in index.html.
+     Existing stack simulations continue using their original rules. -->
+<style>
+  .missions .formula[data-pda-editable="true"] {
+    display: inline-block;
+    min-width: 12ch;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    cursor: text;
+    outline: none;
+    vertical-align: middle;
+  }
+  .missions .formula[data-pda-editable="true"]:hover {
+    border-color: #69a8ff;
+  }
+  .missions .formula[data-pda-editable="true"]:focus {
+    border-color: #69a8ff;
+    box-shadow: 0 0 0 2px rgba(105,168,255,.18);
+  }
+</style>
+<script>
+(() => {
+  const formulas = [
+    { selector: '.missions > .card:nth-child(1) .formula', key: 'pda-trials-editable-language' },
+    { selector: '.missions > .card:nth-child(2) .formula', key: 'pda-trials-editable-cfg' }
+  ];
+
+  function activate({selector, key}) {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    el.contentEditable = 'true';
+    el.dataset.pdaEditable = 'true';
+    el.setAttribute('role', 'textbox');
+    el.setAttribute('aria-label', key.endsWith('cfg') ? 'Edit CFG rule' : 'Edit language definition');
+    el.setAttribute('title', 'Click to edit. Your changes are saved in this browser.');
+    el.setAttribute('spellcheck', 'false');
+    const original = el.textContent;
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved !== null) el.textContent = saved;
+    } catch (_) { /* storage may be disabled */ }
+    function save() {
+      const value = el.textContent;
+      try { localStorage.setItem(key, value); } catch (_) {}
+    }
+    el.addEventListener('input', save);
+    el.addEventListener('blur', save);
+    el.addEventListener('keydown', event => {
+      if (event.key === 'Enter') { event.preventDefault(); el.blur(); }
+    });
+    el.addEventListener('paste', event => {
+      event.preventDefault();
+      const plain = (event.clipboardData || window.clipboardData).getData('text/plain').replace(/[\r\n]+/g, ' ');
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const node = document.createTextNode(plain);
+      range.insertNode(node);
+      range.setStartAfter(node);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      save();
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => formulas.forEach(activate));
+  } else {
+    formulas.forEach(activate);
+  }
+})();
+</script>
+
 </body>
 </html>
